@@ -29,7 +29,9 @@ The judge weighs five criteria, most important first. This line was chosen to sc
 
 ## How it runs
 
-`python3 main.py` validates the line against the competition gate (1–5 words, 1–88 characters, UTF-8, not only whitespace) and writes it to `/output/entry.txt` (falling back to `./output/entry.txt` locally so it can be smoke-tested outside the sandbox). If the line ever broke a cap, the program refuses to write rather than submit a gate-failing file.
+`python3 main.py` validates the line against the competition gate (1–5 words, 1–88 characters, UTF-8, not only whitespace) and writes it to `/output/entry.txt` (falling back to `./output/entry.txt` locally so it can be smoke-tested outside the sandbox). If the line ever broke a cap, the program refuses to write rather than submit a gate-failing file. After writing, it reads the file back and verifies the exact bytes — the gate scores the file, not the string in memory, so a truncated write or a stale file fails loudly instead of submitting a wrong entry.
+
+Local smoke test (2026-11-25): `python3 main.py` → `wrote /output/entry.txt: 23 characters, 5 words (read-back verified)`, file reads back exactly `I never sold your data.\n` — gate OK.
 
 ## Anchor
 

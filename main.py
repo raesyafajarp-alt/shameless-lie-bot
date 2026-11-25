@@ -135,12 +135,26 @@ def main():
 
     # Prefer the sandbox output path; fall back to a local ./output so
     # the program can be run and checked outside the sandbox too.
+    # After writing, read the file back and verify its exact bytes:
+    # the gate scores the file, not the string in memory, so a write
+    # that silently truncated or a stale file left by another program
+    # must fail loudly here instead of submitting a wrong entry.
+    payload = (LINE + "\n").encode("utf-8")
     for path in ("/output/entry.txt", "output/entry.txt"):
         try:
             os.makedirs(os.path.dirname(path), exist_ok=True)
-            with open(path, "w", encoding="utf-8") as f:
-                f.write(LINE + "\n")
-            print("wrote %s: %d characters, %d words" % (path, len(LINE), len(LINE.split())))
+            with open(path, "wb") as f:
+                f.write(payload)
+            with open(path, "rb") as f:
+                written = f.read()
+            if written != payload:
+                print(
+                    "verify failed for %s: wrote %d bytes, read back %d"
+                    % (path, len(payload), len(written)),
+                    file=sys.stderr,
+                )
+                raise SystemExit(1)
+            print("wrote %s: %d characters, %d words (read-back verified)" % (path, len(LINE), len(LINE.split())))
             print(LINE)
             return
         except OSError as exc:
